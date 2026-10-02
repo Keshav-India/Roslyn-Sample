@@ -1,0 +1,108 @@
+﻿using System;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+
+class Program
+{
+    static void Main()
+    {
+        // Your facade classes as source code string
+        string code = @"
+public class EmployeeMaster
+{
+    public int Id { get; }
+    public string Name { get; }
+
+    public EmployeeMaster(int id, string name)
+    {
+        Id = id;
+        Name = name;
+    }
+
+    public void ShowEmployee()
+    {
+        Console.WriteLine($""Employee: {Id} - {Name}"");
+    }
+}
+
+public class AddressMaster
+{
+    public string City { get; }
+    public string Street { get; }
+
+    public AddressMaster(string city, string street)
+    {
+        City = city;
+        Street = street;
+    }
+
+    public void ShowAddress()
+    {
+        Console.WriteLine($""Address: {Street}, {City}"");
+    }
+}
+
+public class DepartmentMaster
+{
+    public string DepartmentName { get; }
+
+    public DepartmentMaster(string deptName)
+    {
+        DepartmentName = deptName;
+    }
+
+    public void ShowDepartment()
+    {
+        Console.WriteLine($""Department: {DepartmentName}"");
+    }
+}
+
+public class EmployeeFacade
+{
+    private readonly EmployeeMaster _employee;
+    private readonly AddressMaster _address;
+    private readonly DepartmentMaster _department;
+
+    public EmployeeFacade(int id, string name, string city, string street, string dept)
+    {
+        _employee = new EmployeeMaster(id, name);
+        _address = new AddressMaster(city, street);
+        _department = new DepartmentMaster(dept);
+    }
+
+    public void ShowFullDetails()
+    {
+        Console.WriteLine(""└── Employee Record"");
+        Console.WriteLine(""    ├── Employee Info"");
+        _employee.ShowEmployee();
+        Console.WriteLine(""    ├── Address Info"");
+        _address.ShowAddress();
+        Console.WriteLine(""    └── Department Info"");
+        _department.ShowDepartment();
+    }
+}
+";
+
+        // Parse code into Roslyn syntax tree
+        SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
+
+        Console.WriteLine("=== Syntax Tree Structure ===");
+        PrintTree(tree.GetRoot(), "");
+
+        Console.WriteLine("\nPress any key to exit...");
+        Console.ReadKey();
+    }
+
+    static void PrintTree(SyntaxNode node, string indent)
+    {
+        Console.WriteLine($"{indent}{node.Kind()}");
+
+        foreach (var child in node.ChildNodes())
+        {
+            PrintTree(child, indent + "  ");
+        }
+    }
+}
+
+
+
